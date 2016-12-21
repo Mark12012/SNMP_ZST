@@ -544,12 +544,20 @@ public class MainBrowserWindow extends JFrame {
 			
 			tableMainOID = OID;
 			tmpTableOIDChecker = OID;
-					
+			response = snmp.snmpGetNext(OID);
+			if(!response[0].substring(0,OID.length()).equals(OID))
+			{
+				JOptionPane.showMessageDialog(MainBrowserWindow.this, "Table is empty.", "END OF TABLE",
+						JOptionPane.INFORMATION_MESSAGE);
+				return;
+			}
 			do
 			{
 				List<String> columnValue = new ArrayList<>();
 				response = snmp.snmpGetNext(OID);
-				String name = response[0].replace(tableMainOID, "");
+				String name = response[0];
+				name = name.replace(tableMainOID, "");
+				
 				if(!name.isEmpty())
 				{
 					name = name.substring(name.indexOf('.')+1, name.length());
