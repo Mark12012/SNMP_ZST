@@ -43,6 +43,10 @@ import model.SNMPget;
 public class MainBrowserWindow extends JFrame {
 
 	private static final long serialVersionUID = 1L;
+	
+	private final String SYS_OIDS_FILE = "sysOids.properties";
+	private final String TABLE_OIDS_FILE = "tableOids.properties";
+	private final String OTHERS_OIDS_FILE = "otherOids.properties";
 
 	/** BROWSER OUTPUT TEXTFIELD */
 	private JTextField OIDTextField;
@@ -84,8 +88,10 @@ public class MainBrowserWindow extends JFrame {
 	private MonitoringInterface monitoringInterface;
 	
 	
-	private JComboBox<String> OIDsComboBox;
 	
+	private JComboBox<String> systemOIDsComboBox;
+	private JComboBox<String> tableOIDsComboBox;
+	private JComboBox<String> otherOIDsComboBox;
 
 	public MainBrowserWindow(SNMPConnectionConfiguration conf) {
 		this();
@@ -93,7 +99,9 @@ public class MainBrowserWindow extends JFrame {
 		try {
 			snmp = new SNMPget(conf.getMachineAddress(), "" + conf.getSnmpPort(), conf.getSnmpVersion(),
 					conf.getReadCommunity());
-			getOIDNames();
+			getSystemOIDNames();
+			getTableOIDNames();
+			getOtherOIDNames();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -106,7 +114,9 @@ public class MainBrowserWindow extends JFrame {
 		machineIPTextField.setText(conf.getMachineAddress());
 		snmpPortTextField.setText(String.valueOf(conf.getSnmpPort()));
 		readCommunityTextField.setText(conf.getReadCommunity());
-		initComboBox();
+		initSystemComboBox();
+		initTableComboBox();
+		initOthersComboBox();
 	}
 
 
@@ -239,12 +249,12 @@ public class MainBrowserWindow extends JFrame {
 		lblConf3.setBounds(956, 121, 73, 20);
 		contentPane.add(lblConf3);
 
-		JLabel lblHelp = new JLabel("READY OIDS:");
-		lblHelp.setHorizontalAlignment(SwingConstants.TRAILING);
-		lblHelp.setForeground(Color.ORANGE);
-		lblHelp.setFont(new Font("Tahoma", Font.PLAIN, 9));
-		lblHelp.setBounds(956, 185, 73, 20);
-		contentPane.add(lblHelp);
+		JLabel otherOIDSlbl = new JLabel("OTHERS OID's:");
+		otherOIDSlbl.setHorizontalAlignment(SwingConstants.LEFT);
+		otherOIDSlbl.setForeground(Color.ORANGE);
+		otherOIDSlbl.setFont(new Font("Tahoma", Font.PLAIN, 9));
+		otherOIDSlbl.setBounds(956, 269, 73, 20);
+		contentPane.add(otherOIDSlbl);
 		
 		JLabel lblTraps = new JLabel("TRAPS");
 		lblTraps.setHorizontalAlignment(SwingConstants.CENTER);
@@ -252,6 +262,20 @@ public class MainBrowserWindow extends JFrame {
 		lblTraps.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		lblTraps.setBounds(747, 337, 130, 25);
 		contentPane.add(lblTraps);
+		
+		JLabel systemOIDSlbl = new JLabel("SYSTEM OID's:");
+		systemOIDSlbl.setHorizontalAlignment(SwingConstants.LEFT);
+		systemOIDSlbl.setForeground(Color.ORANGE);
+		systemOIDSlbl.setFont(new Font("Tahoma", Font.PLAIN, 9));
+		systemOIDSlbl.setBounds(956, 171, 73, 20);
+		contentPane.add(systemOIDSlbl);
+		
+		JLabel tableOIDSlbl = new JLabel("TABLE OID's:");
+		tableOIDSlbl.setHorizontalAlignment(SwingConstants.LEFT);
+		tableOIDSlbl.setForeground(Color.ORANGE);
+		tableOIDSlbl.setFont(new Font("Tahoma", Font.PLAIN, 9));
+		tableOIDSlbl.setBounds(956, 220, 73, 20);
+		contentPane.add(tableOIDSlbl);
 		
 		/** BROWSER INPUT TEXTFIELD */
 		OIDTextField = new JTextField();
@@ -357,9 +381,7 @@ public class MainBrowserWindow extends JFrame {
 
 
 
-		OIDsComboBox = new JComboBox<String>();
-		OIDsComboBox.setBounds(956, 204, 96, 20);
-		contentPane.add(OIDsComboBox);
+	
 		
 		trapsTable = new JTable()
 		{
@@ -386,6 +408,22 @@ public class MainBrowserWindow extends JFrame {
 		JScrollPane trapsScrollPane = new JScrollPane(trapsTable);
 		trapsScrollPane.setBounds(573, 373, 479, 164);
 		contentPane.add(trapsScrollPane);
+		
+		
+		/** COMBO BOXES */
+		otherOIDsComboBox = new JComboBox<String>();
+		otherOIDsComboBox.setBounds(956, 285, 96, 20);
+		contentPane.add(otherOIDsComboBox);
+		
+		systemOIDsComboBox = new JComboBox<String>();
+		systemOIDsComboBox.setBounds(955, 189, 96, 20);
+		contentPane.add(systemOIDsComboBox);
+		
+	
+		
+		tableOIDsComboBox = new JComboBox<String>();
+		tableOIDsComboBox.setBounds(955, 236, 96, 20);
+		contentPane.add(tableOIDsComboBox);
 		
 	
 
@@ -425,11 +463,23 @@ public class MainBrowserWindow extends JFrame {
 				}
 			}
 		});
-
-		OIDsComboBox.addActionListener(new ActionListener() {
+		systemOIDsComboBox.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				OIDTextField.setText(OIDsComboBox.getSelectedItem().toString());
-				OIDMonitoringTextField.setText(OIDsComboBox.getSelectedItem().toString());
+				OIDTextField.setText(systemOIDsComboBox.getSelectedItem().toString());
+				OIDMonitoringTextField.setText(systemOIDsComboBox.getSelectedItem().toString());
+			}
+		});
+		
+		tableOIDsComboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OIDTextField.setText(tableOIDsComboBox.getSelectedItem().toString());
+			}
+		});
+
+		otherOIDsComboBox.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				OIDTextField.setText(otherOIDsComboBox.getSelectedItem().toString());
+				OIDMonitoringTextField.setText(otherOIDsComboBox.getSelectedItem().toString());
 			}
 		});
 		
@@ -449,19 +499,7 @@ public class MainBrowserWindow extends JFrame {
 		String[] response = null;
 		try {
 			String OID = OIDTextField.getText();
-			if (!OID.matches(".*\\d.*")) {
-				try (FileReader reader = new FileReader("oids.properties")) {
-					Properties prop = new Properties();
-					prop.load(reader);
-					OID = prop.getProperty(OID);
-				} catch (FileNotFoundException e) {
-					JOptionPane.showMessageDialog(MainBrowserWindow.this, "oids.properties file not found.", "ERROR",
-							JOptionPane.ERROR_MESSAGE);
-				} catch (IOException e) {
-					JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading oids.properties failed.", "ERROR",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
+			OID = parseOID(OID);
 			response = snmp.snmpGet(OID);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(MainBrowserWindow.this, "SNMP Get failed.", "ERROR",
@@ -475,20 +513,7 @@ public class MainBrowserWindow extends JFrame {
 		String[] response = null;
 		try {
 			String OID = OIDTextField.getText();
-			if (!OID.matches(".*\\d.*")) {
-				try (FileReader reader = new FileReader("oids.properties")) {
-					Properties prop = new Properties();
-					prop.load(reader);
-					OID = prop.getProperty(OID);
-				} catch (FileNotFoundException e) {
-					JOptionPane.showMessageDialog(MainBrowserWindow.this, "oids.properties file not found.", "ERROR",
-							JOptionPane.ERROR_MESSAGE);
-				} catch (IOException e) {
-					JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading oids.properties failed.", "ERROR",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
-		//	OID +=  ".0";
+			OID = parseOID(OID);
 			response = snmp.snmpGetNext(OID);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(MainBrowserWindow.this, "SNMP GetNext failed.", "ERROR",
@@ -513,25 +538,11 @@ public class MainBrowserWindow extends JFrame {
 		String tmpTableOIDChecker;
 		try {
 			String OID = OIDTextField.getText();
+			OID = parseOID(OID);
+			
 			tableMainOID = OID;
 			tmpTableOIDChecker = OID;
-			
-			/** Check that OID is String or normal value , replace it with normal value */
-			if (!OID.matches(".*\\d.*")) {
-				try (FileReader reader = new FileReader("oids.properties")) {
-					Properties prop = new Properties();
-					prop.load(reader);
-					OID = prop.getProperty(OID);
-				} catch (FileNotFoundException e) {
-					JOptionPane.showMessageDialog(MainBrowserWindow.this, "oids.properties file not found.", "ERROR",
-							JOptionPane.ERROR_MESSAGE);
-				} catch (IOException e) {
-					JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading oids.properties failed.", "ERROR",
-							JOptionPane.ERROR_MESSAGE);
-				}
-			}
-			
-			
+					
 			do
 			{
 				List<String> columnValue = new ArrayList<>();
@@ -569,9 +580,6 @@ public class MainBrowserWindow extends JFrame {
 				tmpTableOIDChecker = response[0].substring(0, tableMainOID.length());
 			}while(tableMainOID.equals(tmpTableOIDChecker));
 			
-//			System.out.println(columnsList);
-//			for(List<String> rowlist : rowsLists)
-//				System.out.println(rowlist);
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(MainBrowserWindow.this, "SNMP GetTABLE failed.", "ERROR",
 					JOptionPane.ERROR_MESSAGE);
@@ -595,7 +603,7 @@ public class MainBrowserWindow extends JFrame {
 		}
 		
 		DefaultTableModel model = new DefaultTableModel(tmpRows, tmpColumns);
-		getTableTable.setModel(model);// = new JTable(tmpRows,tmpColumns);
+		getTableTable.setModel(model);
 	}
 
 	private void monitoringStart() {
@@ -622,21 +630,8 @@ public class MainBrowserWindow extends JFrame {
 		private String OID;
 
 		public MonitoringInterface() {
-			OID = OIDMonitoringTextField.getText();//.replace(".0", "");
-			if (!OID.matches(".*\\d.*")) {
-				try (FileReader reader = new FileReader("oids.properties")) {
-					Properties prop = new Properties();
-					prop.load(reader);
-					OID = prop.getProperty(OID).replace(".0", "");
-				} catch (FileNotFoundException e) {
-					JOptionPane.showMessageDialog(MainBrowserWindow.this, "oids.properties file not found.", "ERROR",
-							JOptionPane.ERROR_MESSAGE);
-				} catch (IOException e) {
-					JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading oids.properties failed.", "ERROR",
-							JOptionPane.ERROR_MESSAGE);
-					;
-				}
-			}
+			OID = OIDMonitoringTextField.getText();
+			OID = parseOID(OID);
 		}
 
 		public void terminate() {
@@ -672,34 +667,101 @@ public class MainBrowserWindow extends JFrame {
 		trapModel.addRow(new Object[] { des, source, time, sev });
 	}
 	
+	private void initSystemComboBox() {
 
-	private void initComboBox() {
-
-		try (FileReader reader = new FileReader("oids.properties")) {
+		try (FileReader reader = new FileReader(SYS_OIDS_FILE)) {
 			Properties prop = new Properties();
 			prop.load(reader);
 			Enumeration<?> e = prop.propertyNames();
 			while (e.hasMoreElements()) {
 				String key = (String) e.nextElement();
-				OIDsComboBox.addItem(key);
+				systemOIDsComboBox.addItem(key);
 			}
 		} catch (FileNotFoundException e) {
-			JOptionPane.showMessageDialog(MainBrowserWindow.this, "oids.properties file not found.", "ERROR",
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, "sysOids.properties file not found.", "ERROR",
 					JOptionPane.ERROR_MESSAGE);
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading oids.properties failed.", "ERROR",
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading sysOids.properties failed.", "ERROR",
 					JOptionPane.ERROR_MESSAGE);
 		}
 
 	}
+	
+	private void initTableComboBox() {
 
-	private void getOIDNames() throws IOException {
-		File file = new File("oids.properties");
+		try (FileReader reader = new FileReader(TABLE_OIDS_FILE)) {
+			Properties prop = new Properties();
+			prop.load(reader);
+			Enumeration<?> e = prop.propertyNames();
+			while (e.hasMoreElements()) {
+				String key = (String) e.nextElement();
+				tableOIDsComboBox.addItem(key);
+			}
+		} catch (FileNotFoundException e) {
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, "tableOids.properties file not found.", "ERROR",
+					JOptionPane.ERROR_MESSAGE);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading tableOids.properties failed.", "ERROR",
+					JOptionPane.ERROR_MESSAGE);
+		}
+
+	}
+	
+
+	private void initOthersComboBox() {
+
+		try (FileReader reader = new FileReader(OTHERS_OIDS_FILE)) {
+			Properties prop = new Properties();
+			prop.load(reader);
+			Enumeration<?> e = prop.propertyNames();
+			while (e.hasMoreElements()) {
+				String key = (String) e.nextElement();
+				otherOIDsComboBox.addItem(key);
+			}
+		} catch (FileNotFoundException e) {
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, "otherOids.properties file not found.", "ERROR",
+					JOptionPane.ERROR_MESSAGE);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading otherOids.properties failed.", "ERROR",
+					JOptionPane.ERROR_MESSAGE);
+		}
+
+	}
+	
+	private void getSystemOIDNames() throws IOException {
+		File file = new File(SYS_OIDS_FILE);
 		if (!file.exists()) {
 			file.createNewFile();
-			String defaultData = "sysDescr=1.3.6.1.2.1.1.1\n" + "sysObjectID=1.3.6.1.2.1.1.2\n"
-					+ "sysUpTime=1.3.6.1.2.1.1.3\n" + "sysContact=1.3.6.1.2.1.1.4\n" + "sysName=1.3.6.1.2.1.1.5\n"
-					+ "sysLocation=1.3.6.1.2.1.1.6\n" + "sysServices=1.3.6.1.2.1.1.7\n" + "ifNumber=1.3.6.1.2.1.2.1\n"
+			String defaultData = "sysDescr=1.3.6.1.2.1.1.1.0\n" + "sysObjectID=1.3.6.1.2.1.1.2.0\n"
+					+ "sysUpTime=1.3.6.1.2.1.1.3.0\n" + "sysContact=1.3.6.1.2.1.1.4.0\n" + "sysName=1.3.6.1.2.1.1.5.0\n"
+					+ "sysLocation=1.3.6.1.2.1.1.6.0\n" + "sysServices=1.3.6.1.2.1.1.7.0\n";
+			FileWriter fileWritter = new FileWriter(file.getName(), true);
+			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
+			bufferWritter.write(defaultData);
+			bufferWritter.close();
+		}
+
+	}
+	
+	private void getTableOIDNames() throws IOException {
+		File file = new File(TABLE_OIDS_FILE);
+		if (!file.exists()) {
+			file.createNewFile();
+			String defaultData = "sysORTable=1.3.6.1.2.1.1.9\n" + "ifTable=1.3.6.1.2.1.2.2\n"
+					+ "ipAddrTable=1.3.6.1.2.1.4.20\n" + "ipRouteTable=1.3.6.1.2.1.4.21\n" + "ipNetToMediaTable=1.3.6.1.2.1.4.22\n"
+					+ "tcpConnTable=1.3.6.1.2.1.6.13\n" + "udpTable=1.3.6.1.2.1.7.5\n";
+			FileWriter fileWritter = new FileWriter(file.getName(), true);
+			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
+			bufferWritter.write(defaultData);
+			bufferWritter.close();
+		}
+	}
+
+	private void getOtherOIDNames() throws IOException {
+		File file = new File(OTHERS_OIDS_FILE);
+		if (!file.exists()) {
+			file.createNewFile();
+			String defaultData =  "ifNumber=1.3.6.1.2.1.2.1\n"
 					+ "ifIndex=1.3.6.1.2.1.2.2.1.1\n" + "ifDescr=1.3.6.1.2.1.2.2.1.2\n" + "ifType=1.3.6.1.2.1.2.2.1.3\n"
 					+ "ifMtu=1.3.6.1.2.1.2.2.1.4\n" + "ifSpeed=1.3.6.1.2.1.2.2.1.5\n"
 					+ "ifPhysAddress=1.3.6.1.2.1.2.2.1.6\n" + "ifAdminStatus=1.3.6.1.2.1.2.2.1.7\n"
@@ -719,4 +781,31 @@ public class MainBrowserWindow extends JFrame {
 		}
 
 	}
+	
+	private String parseOID(String OID)
+	{
+		if (!OID.matches(".*\\d.*")) {
+			String fileName = null;
+			if(OID.contains("Table"))
+				fileName = TABLE_OIDS_FILE;
+			else if(OID.contains("sys"))
+				fileName = SYS_OIDS_FILE;
+			else
+				fileName = OTHERS_OIDS_FILE;
+			try (FileReader reader = new FileReader(fileName)) {
+				Properties prop = new Properties();
+				prop.load(reader);
+				if(prop.getProperty(OID) != null)
+					OID = prop.getProperty(OID);
+			} catch (FileNotFoundException e) {
+				JOptionPane.showMessageDialog(MainBrowserWindow.this, fileName+ " file not found.", "ERROR",
+						JOptionPane.ERROR_MESSAGE);
+			} catch (IOException e) {
+				JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading "+ fileName +" failed.", "ERROR",
+						JOptionPane.ERROR_MESSAGE);
+			}
+		}
+		return OID;
+	}
+	
 }
