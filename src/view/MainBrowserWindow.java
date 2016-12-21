@@ -1,7 +1,9 @@
 package view;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
@@ -46,17 +48,24 @@ public class MainBrowserWindow extends JFrame {
 	private JTextField OIDTextField;
 
 	/**
-	 * BROWSER INPUT - Table with Get/Get Next results - columns : Name/OID,
+	 * BROWSER OUTPUT - Table with Get/Get Next results - columns : Name/OID,
 	 * Value, Type, IP:Port
 	 */
 	private JTable browserTable;
+	/**MONITORING OUTPUT -  Table to writing whole table from MIB */
+	private JTable getTableTable;
+	/**TRAPS OUTPUT -  Table to show received traps */
+	private JTable trapsTable;
+	
+	/** Table model hander to write row there */
 	private DefaultTableModel tableModel;
+	/** Table model hander to write row there */
 	private DefaultTableModel trapModel;
 
-	/** MONITORING OUTPUT TEXTFIELD */
+	/** MONITORING INPUT TEXTFIELD */
 	private JTextField OIDMonitoringTextField;
 
-	/** MONITORING INPUT TEXTFIELD */
+	/** MONITORING OUTPUT TEXTFIELD */
 	private JTextField OIDResultMonitoringTextField;
 	private JTextPane valueResultMonitoringTextPane;
 	private JTextField typeResultMonitoringTextField;
@@ -67,13 +76,16 @@ public class MainBrowserWindow extends JFrame {
 	private JTextField snmpPortTextField;
 	private JTextField readCommunityTextField;
 
-	private SNMPget snmp = null;
+	/** SNMP hander instance */
+	private SNMPget snmp;
 
+	/** MONITORING THREAD */
 	private Thread monitoringThread;
 	private MonitoringInterface monitoringInterface;
+	
+	
 	private JComboBox<String> OIDsComboBox;
-	private JTable getTableTable;
-	private JTable trapsTable;
+	
 
 	public MainBrowserWindow(SNMPConnectionConfiguration conf) {
 		this();
@@ -86,8 +98,8 @@ public class MainBrowserWindow extends JFrame {
 			e.printStackTrace();
 		}
 		
+		/** START TRAP RECEIVER */
 		SNMPTrapReceiver snmpTrapReceiver = new SNMPTrapReceiver(this, conf.getMachineAddress(), conf.getSnmpVersion(), conf.getReadCommunity());
-		// Start new thread
 		Thread snmpTrapThread = new Thread(snmpTrapReceiver);
 		snmpTrapThread.start();
 
@@ -97,60 +109,21 @@ public class MainBrowserWindow extends JFrame {
 		initComboBox();
 	}
 
-	private void initComboBox() {
-
-		try (FileReader reader = new FileReader("oids.properties")) {
-			Properties prop = new Properties();
-			prop.load(reader);
-			Enumeration<?> e = prop.propertyNames();
-			while (e.hasMoreElements()) {
-				String key = (String) e.nextElement();
-				OIDsComboBox.addItem(key);
-			}
-		} catch (FileNotFoundException e) {
-			JOptionPane.showMessageDialog(MainBrowserWindow.this, "oids.properties file not found.", "ERROR",
-					JOptionPane.ERROR_MESSAGE);
-		} catch (IOException e) {
-			JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading oids.properties failed.", "ERROR",
-					JOptionPane.ERROR_MESSAGE);
-		}
-
-	}
-
-	private void getOIDNames() throws IOException {
-		File file = new File("oids.properties");
-		if (!file.exists()) {
-			file.createNewFile();
-			String defaultData = "sysDescr=1.3.6.1.2.1.1.1\n" + "sysObjectID=1.3.6.1.2.1.1.2\n"
-					+ "sysUpTime=1.3.6.1.2.1.1.3\n" + "sysContact=1.3.6.1.2.1.1.4\n" + "sysName=1.3.6.1.2.1.1.5\n"
-					+ "sysLocation=1.3.6.1.2.1.1.6\n" + "sysServices=1.3.6.1.2.1.1.7\n" + "ifNumber=1.3.6.1.2.1.2.1\n"
-					+ "ifIndex=1.3.6.1.2.1.2.2.1.1\n" + "ifDescr=1.3.6.1.2.1.2.2.1.2\n" + "ifType=1.3.6.1.2.1.2.2.1.3\n"
-					+ "ifMtu=1.3.6.1.2.1.2.2.1.4\n" + "ifSpeed=1.3.6.1.2.1.2.2.1.5\n"
-					+ "ifPhysAddress=1.3.6.1.2.1.2.2.1.6\n" + "ifAdminStatus=1.3.6.1.2.1.2.2.1.7\n"
-					+ "ifOperStatus=1.3.6.1.2.1.2.2.1.8\n" + "ifLastChange=1.3.6.1.2.1.2.2.1.9\n"
-					+ "ifInOctets=1.3.6.1.2.1.2.2.1.10\n" + "ifInUcastPkts=1.3.6.1.2.1.2.2.1.11\n"
-					+ "ifInNUcastPkts=1.3.6.1.2.1.2.2.1.12\n" + "ifInDiscards=1.3.6.1.2.1.2.2.1.13\n"
-					+ "ifInErrors=1.3.6.1.2.1.2.2.1.14\n" + "ifInUnknownProtos=1.3.6.1.2.1.2.2.1.15\n"
-					+ "ifOutOctets=1.3.6.1.2.1.2.2.1.16\n" + "ifOutUcastPkts=1.3.6.1.2.1.2.2.1.17\n"
-					+ "ifOutNUcastPkts=1.3.6.1.2.1.2.2.1.18\n" + "ifOutDiscards=1.3.6.1.2.1.2.2.1.19\n"
-					+ "ifOutErrors=1.3.6.1.2.1.2.2.1.20\n" + "ifOutQLen=1.3.6.1.2.1.2.2.1.21\n"
-					+ "ifSpecific=1.3.6.1.2.1.2.2.1.22\n" + "atIfIndex=1.3.6.1.2.1.3.1.1.1\n"
-					+ "atPhysAddress=1.3.6.1.2.1.3.1.1.2\n" + "atNetAddress=1.3.6.1.2.1.3.1.1.3\n";
-			FileWriter fileWritter = new FileWriter(file.getName(), true);
-			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
-			bufferWritter.write(defaultData);
-			bufferWritter.close();
-		}
-
-	}
 
 	/**
 	 * Create the frame.
 	 */
 	public MainBrowserWindow() {
+		setTitle("SNMP BROWSER");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 1077, 599);
 
+		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+	    int x = (int) ((dimension.getWidth() - getWidth()) / 2);
+	    int y = (int) ((dimension.getHeight() - getHeight()) / 2);
+	    setLocation(x, y);
+	    
+	    
 		/** PANELS */
 		JPanel contentPane = new JPanel();
 		contentPane.setBackground(Color.DARK_GRAY);
@@ -202,6 +175,11 @@ public class MainBrowserWindow extends JFrame {
 		btnStopMonitoring.setBackground(Color.GRAY);
 		btnStopMonitoring.setBounds(272, 72, 89, 23);
 		monitoringPanel.add(btnStopMonitoring);
+		
+		JButton btnGetTable = new JButton("Get Table");
+		btnGetTable.setBackground(Color.GRAY);
+		btnGetTable.setBounds(300, 52, 89, 23);
+		browserPanel.add(btnGetTable);
 
 		/** LABELS */
 		JLabel lblOID = new JLabel("OID:");
@@ -261,7 +239,21 @@ public class MainBrowserWindow extends JFrame {
 		lblConf3.setBounds(956, 121, 73, 20);
 		contentPane.add(lblConf3);
 
-		/** BROWSER OUTPUT TEXTFIELD */
+		JLabel lblHelp = new JLabel("READY OIDS:");
+		lblHelp.setHorizontalAlignment(SwingConstants.TRAILING);
+		lblHelp.setForeground(Color.ORANGE);
+		lblHelp.setFont(new Font("Tahoma", Font.PLAIN, 9));
+		lblHelp.setBounds(956, 185, 73, 20);
+		contentPane.add(lblHelp);
+		
+		JLabel lblTraps = new JLabel("TRAPS");
+		lblTraps.setHorizontalAlignment(SwingConstants.CENTER);
+		lblTraps.setForeground(Color.ORANGE);
+		lblTraps.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		lblTraps.setBounds(747, 337, 130, 25);
+		contentPane.add(lblTraps);
+		
+		/** BROWSER INPUT TEXTFIELD */
 		OIDTextField = new JTextField();
 		OIDTextField.setBackground(Color.LIGHT_GRAY);
 		OIDTextField.setBounds(51, 22, 225, 20);
@@ -282,7 +274,6 @@ public class MainBrowserWindow extends JFrame {
             }
         };
         browserTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF);
-	//	browserTable.setPreferredSize(new Dimension(533, 195));
 		
 		tableModel = new DefaultTableModel(new Object[][] {}, new String[] { "Name/OID", "Value", "Type", "IP/Port" });
 		browserTable.setModel(tableModel);
@@ -302,10 +293,7 @@ public class MainBrowserWindow extends JFrame {
 		browserPanel.add(getTableScrollPane);
 		
 		
-		JButton btnGetTable = new JButton("Get Table");
-		btnGetTable.setBackground(Color.GRAY);
-		btnGetTable.setBounds(300, 52, 89, 23);
-		browserPanel.add(btnGetTable);
+
 
 		/** MONITORING OUTPUT TEXTFIELD */
 		OIDMonitoringTextField = new JTextField();
@@ -367,12 +355,7 @@ public class MainBrowserWindow extends JFrame {
 		readCommunityTextField.setBounds(955, 140, 96, 20);
 		contentPane.add(readCommunityTextField);
 
-		JLabel lblHelp = new JLabel("READY OIDS:");
-		lblHelp.setHorizontalAlignment(SwingConstants.TRAILING);
-		lblHelp.setForeground(Color.ORANGE);
-		lblHelp.setFont(new Font("Tahoma", Font.PLAIN, 9));
-		lblHelp.setBounds(956, 185, 73, 20);
-		contentPane.add(lblHelp);
+
 
 		OIDsComboBox = new JComboBox<String>();
 		OIDsComboBox.setBounds(956, 204, 96, 20);
@@ -404,12 +387,7 @@ public class MainBrowserWindow extends JFrame {
 		trapsScrollPane.setBounds(573, 373, 479, 164);
 		contentPane.add(trapsScrollPane);
 		
-		JLabel lblTraps = new JLabel("TRAPS");
-		lblTraps.setHorizontalAlignment(SwingConstants.CENTER);
-		lblTraps.setForeground(Color.ORANGE);
-		lblTraps.setFont(new Font("Tahoma", Font.PLAIN, 18));
-		lblTraps.setBounds(747, 337, 130, 25);
-		contentPane.add(lblTraps);
+	
 
 		/** LISTENERS */
 		btnGetNext.addActionListener(new ActionListener() {
@@ -692,5 +670,53 @@ public class MainBrowserWindow extends JFrame {
 	public void addTrapRow(String des, String source, String time, String sev)
 	{
 		trapModel.addRow(new Object[] { des, source, time, sev });
+	}
+	
+
+	private void initComboBox() {
+
+		try (FileReader reader = new FileReader("oids.properties")) {
+			Properties prop = new Properties();
+			prop.load(reader);
+			Enumeration<?> e = prop.propertyNames();
+			while (e.hasMoreElements()) {
+				String key = (String) e.nextElement();
+				OIDsComboBox.addItem(key);
+			}
+		} catch (FileNotFoundException e) {
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, "oids.properties file not found.", "ERROR",
+					JOptionPane.ERROR_MESSAGE);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading oids.properties failed.", "ERROR",
+					JOptionPane.ERROR_MESSAGE);
+		}
+
+	}
+
+	private void getOIDNames() throws IOException {
+		File file = new File("oids.properties");
+		if (!file.exists()) {
+			file.createNewFile();
+			String defaultData = "sysDescr=1.3.6.1.2.1.1.1\n" + "sysObjectID=1.3.6.1.2.1.1.2\n"
+					+ "sysUpTime=1.3.6.1.2.1.1.3\n" + "sysContact=1.3.6.1.2.1.1.4\n" + "sysName=1.3.6.1.2.1.1.5\n"
+					+ "sysLocation=1.3.6.1.2.1.1.6\n" + "sysServices=1.3.6.1.2.1.1.7\n" + "ifNumber=1.3.6.1.2.1.2.1\n"
+					+ "ifIndex=1.3.6.1.2.1.2.2.1.1\n" + "ifDescr=1.3.6.1.2.1.2.2.1.2\n" + "ifType=1.3.6.1.2.1.2.2.1.3\n"
+					+ "ifMtu=1.3.6.1.2.1.2.2.1.4\n" + "ifSpeed=1.3.6.1.2.1.2.2.1.5\n"
+					+ "ifPhysAddress=1.3.6.1.2.1.2.2.1.6\n" + "ifAdminStatus=1.3.6.1.2.1.2.2.1.7\n"
+					+ "ifOperStatus=1.3.6.1.2.1.2.2.1.8\n" + "ifLastChange=1.3.6.1.2.1.2.2.1.9\n"
+					+ "ifInOctets=1.3.6.1.2.1.2.2.1.10\n" + "ifInUcastPkts=1.3.6.1.2.1.2.2.1.11\n"
+					+ "ifInNUcastPkts=1.3.6.1.2.1.2.2.1.12\n" + "ifInDiscards=1.3.6.1.2.1.2.2.1.13\n"
+					+ "ifInErrors=1.3.6.1.2.1.2.2.1.14\n" + "ifInUnknownProtos=1.3.6.1.2.1.2.2.1.15\n"
+					+ "ifOutOctets=1.3.6.1.2.1.2.2.1.16\n" + "ifOutUcastPkts=1.3.6.1.2.1.2.2.1.17\n"
+					+ "ifOutNUcastPkts=1.3.6.1.2.1.2.2.1.18\n" + "ifOutDiscards=1.3.6.1.2.1.2.2.1.19\n"
+					+ "ifOutErrors=1.3.6.1.2.1.2.2.1.20\n" + "ifOutQLen=1.3.6.1.2.1.2.2.1.21\n"
+					+ "ifSpecific=1.3.6.1.2.1.2.2.1.22\n" + "atIfIndex=1.3.6.1.2.1.3.1.1.1\n"
+					+ "atPhysAddress=1.3.6.1.2.1.3.1.1.2\n" + "atNetAddress=1.3.6.1.2.1.3.1.1.3\n";
+			FileWriter fileWritter = new FileWriter(file.getName(), true);
+			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
+			bufferWritter.write(defaultData);
+			bufferWritter.close();
+		}
+
 	}
 }

@@ -1,8 +1,10 @@
 package view;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.EventQueue;
 import java.awt.Font;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.BufferedWriter;
@@ -52,17 +54,25 @@ public class StartUpWindow extends JFrame {
 	 * Create the frame.
 	 */
 	public StartUpWindow() {
-		setTitle("Log Client");
+		setTitle("SNMP BROWSER");
 		setType(Type.UTILITY);
-		JPanel contentPane;
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 223, 154);
+		
+		Dimension dimension = Toolkit.getDefaultToolkit().getScreenSize();
+	    int x = (int) ((dimension.getWidth() - getWidth()) / 2);
+	    int y = (int) ((dimension.getHeight() - getHeight()) / 2);
+	    setLocation(x, y);
+	    
+	    /** PANEL */
+		JPanel contentPane;		
 		contentPane = new JPanel();
 		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
 		contentPane.setBackground(Color.LIGHT_GRAY);
 		setContentPane(contentPane);
 		contentPane.setLayout(null);
 
+		/** INPUT TEXT FIELDS */
 		machineAddress = new JTextField();
 		machineAddress.setFont(new Font("Tahoma", Font.BOLD, 11));
 		machineAddress.setForeground(Color.WHITE);
@@ -95,18 +105,7 @@ public class StartUpWindow extends JFrame {
 		snmpVersion.setBounds(101, 63, 106, 20);
 		contentPane.add(snmpVersion);
 
-		JButton okBtn = new JButton("OK");
-		okBtn.setForeground(Color.LIGHT_GRAY);
-		okBtn.setBackground(Color.DARK_GRAY);
-		okBtn.setBounds(0, 84, 105, 31);
-		contentPane.add(okBtn);
-
-		JButton closeBtn = new JButton("CLOSE");
-		closeBtn.setForeground(Color.LIGHT_GRAY);
-		closeBtn.setBackground(Color.DARK_GRAY);
-		closeBtn.setBounds(106, 84, 105, 31);
-		contentPane.add(closeBtn);
-
+		/** INFO TEXT FIELDS */
 		JTextField txtMachineAddress = new JTextField();
 		txtMachineAddress.setHorizontalAlignment(SwingConstants.RIGHT);
 		txtMachineAddress.setEnabled(false);
@@ -155,6 +154,19 @@ public class StartUpWindow extends JFrame {
 		txtSnmpVersion.setBounds(0, 63, 102, 20);
 		contentPane.add(txtSnmpVersion);
 
+		/** BUTTONS */
+		JButton okBtn = new JButton("OK");
+		okBtn.setForeground(Color.LIGHT_GRAY);
+		okBtn.setBackground(Color.DARK_GRAY);
+		okBtn.setBounds(0, 84, 105, 31);
+		contentPane.add(okBtn);
+
+		JButton closeBtn = new JButton("CLOSE");
+		closeBtn.setForeground(Color.LIGHT_GRAY);
+		closeBtn.setBackground(Color.DARK_GRAY);
+		closeBtn.setBounds(106, 84, 105, 31);
+		contentPane.add(closeBtn);
+		
 		/** LISTENERS */
 		okBtn.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
