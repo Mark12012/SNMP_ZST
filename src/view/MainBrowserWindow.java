@@ -47,6 +47,7 @@ public class MainBrowserWindow extends JFrame {
 	private final String SYS_OIDS_FILE = "sysOids.properties";
 	private final String TABLE_OIDS_FILE = "tableOids.properties";
 	private final String OTHERS_OIDS_FILE = "otherOids.properties";
+	private final String TABLE_ENTRTIES_OIDS_FILE = "tableEntries.properties";
 
 	/** BROWSER OUTPUT TEXTFIELD */
 	private JTextField OIDTextField;
@@ -102,6 +103,7 @@ public class MainBrowserWindow extends JFrame {
 			getSystemOIDNames();
 			getTableOIDNames();
 			getOtherOIDNames();
+			initTableEntriesNames();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -599,7 +601,9 @@ public class MainBrowserWindow extends JFrame {
 		String[] tmpColumns = new String[columnsList.size()];
 		for(int i =0; i< columnsList.size();i++)
 		{
-			tmpColumns[i] = columnsList.get(i);
+			String column = columnsList.get(i);
+			column=parseEntryOID(column);
+			tmpColumns[i] = column;
 		}
 		
 		DefaultTableModel model = new DefaultTableModel(tmpRows, tmpColumns);
@@ -806,6 +810,65 @@ public class MainBrowserWindow extends JFrame {
 			}
 		}
 		return OID;
+	}
+	
+	private String parseEntryOID(String OID)
+	{
+		try (FileReader reader = new FileReader(TABLE_ENTRTIES_OIDS_FILE)) {
+			Properties prop = new Properties();
+			prop.load(reader);
+			if(prop.getProperty(OID) != null)
+				OID = prop.getProperty(OID);
+		} catch (FileNotFoundException e) {
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, TABLE_ENTRTIES_OIDS_FILE+ " file not found.", "ERROR",
+					JOptionPane.ERROR_MESSAGE);
+		} catch (IOException e) {
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, "reading "+ TABLE_ENTRTIES_OIDS_FILE +" failed.", "ERROR",
+					JOptionPane.ERROR_MESSAGE);
+		}
+		return OID;
+	}
+	
+	private void initTableEntriesNames() throws IOException
+	{
+		File file = new File(TABLE_ENTRTIES_OIDS_FILE);
+		if (!file.exists()) {
+			file.createNewFile();
+			String defaultData =  "1.3.6.1.2.1.4.20.1.1=ipAdEntAddr\n"
+					+ "1.3.6.1.2.1.4.20.1.2=ipAdEntIfIndex\n" 
+					+ "1.3.6.1.2.1.4.20.1.3=idAdEntNextMask\n" 
+					+ "1.3.6.1.2.1.4.20.1.4=ipAdEntBcastAddr\n"
+					+ "1.3.6.1.2.1.4.20.1.5=ipAdEntReasmMaxSize\n"
+					+ "1.3.6.1.2.1.6.13.1.1=tcpConnState\n"
+					+ "1.3.6.1.2.1.6.13.1.2=tcpConnLocalAddress\n" 
+					+ "1.3.6.1.2.1.6.13.1.3=tcpConnLocalPort\n"
+					+ "1.3.6.1.2.1.6.13.1.4=tcpConnRemAddress\n" 
+					+ "1.3.6.1.2.1.6.13.1.5=tcpConnRemPort\n"
+					+ "1.3.6.1.2.1.7.5.1.1=udpLocalAdress\n" 
+					+ "1.3.6.1.2.1.7.5.1.2=udpLocalPort\n"
+					+ "1.3.6.1.2.1.4.22.1.1=ipNetToMediaIfIndex\n" 
+					+ "1.3.6.1.2.1.4.22.1.2=ipNetToMediaPhysAdress\n"
+					+ "1.3.6.1.2.1.4.22.1.3=ipNetToMediaNetAddress\n" 
+					+ "1.3.6.1.2.1.4.22.1.4=ipNetToMediaType\n"
+					+ "1.3.6.1.2.1.4.21.1.1=ipRouteDest\n" 
+					+ "1.3.6.1.2.1.4.21.1.2=ipRouteIfIndex\n"
+					+ "1.3.6.1.2.1.4.21.1.3=ipRouteMetric1\n" 
+					+ "1.3.6.1.2.1.4.21.1.4=ipRouteMetric2\n"
+					+ "1.3.6.1.2.1.4.21.1.5=ipRouteMetric3\n" 
+					+ "1.3.6.1.2.1.4.21.1.6=ipRouteMetric4\n"
+					+ "1.3.6.1.2.1.4.21.1.7=ipNextHop\n" 
+					+ "1.3.6.1.2.1.4.21.1.8=ipRouteType\n"
+					+ "1.3.6.1.2.1.4.21.1.9=ipRouteProto\n"
+					+ "1.3.6.1.2.1.4.21.1.10=ipRouteAge\n"
+					+ "1.3.6.1.2.1.4.21.1.11=ipRouteMask\n"
+					+ "1.3.6.1.2.1.4.21.1.12=ipRouteMetric5\n"
+					+ "1.3.6.1.2.1.4.21.1.13=ipRouteInfo\n";
+			FileWriter fileWritter = new FileWriter(file.getName(), true);
+			BufferedWriter bufferWritter = new BufferedWriter(fileWritter);
+			bufferWritter.write(defaultData);
+			bufferWritter.close();
+		}
+
 	}
 	
 }
