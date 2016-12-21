@@ -1,9 +1,12 @@
 package view;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -26,6 +29,7 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextField;
 import javax.swing.JTextPane;
+import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
@@ -268,15 +272,30 @@ public class MainBrowserWindow extends JFrame {
 		OIDTextField.setColumns(10);
 
 		/** BROWSER TABLE */
-		browserTable = new JTable();
+		browserTable = new JTable()
+		{
+            public boolean getScrollableTracksViewportWidth()
+            {
+                return getPreferredSize().width < getParent().getWidth();
+            }
+        };
+        browserTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF);
+	//	browserTable.setPreferredSize(new Dimension(533, 195));
+		
 		tableModel = new DefaultTableModel(new Object[][] {}, new String[] { "Name/OID", "Value", "Type", "IP/Port" });
 		browserTable.setModel(tableModel);
-		JScrollPane browserScrollPane = new JScrollPane(browserTable);
+		JScrollPane browserScrollPane = new JScrollPane(browserTable);	
+		browserScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
+		browserScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 		browserScrollPane.setBounds(10, 93, 533, 195);
 		browserPanel.add(browserScrollPane);
 		
+		
 		getTableTable = new JTable();
+		getTableTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 		JScrollPane getTableScrollPane = new JScrollPane(getTableTable);
+		getTableScrollPane.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+		getTableScrollPane.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_ALWAYS);
 		getTableScrollPane.setBounds(10, 311, 533, 216);
 		browserPanel.add(getTableScrollPane);
 		
@@ -357,15 +376,22 @@ public class MainBrowserWindow extends JFrame {
 		OIDsComboBox.setBounds(956, 204, 96, 20);
 		contentPane.add(OIDsComboBox);
 		
-		trapsTable = new JTable();
+		trapsTable = new JTable()
+		{
+            public boolean getScrollableTracksViewportWidth()
+            {
+                return getPreferredSize().width < getParent().getWidth();
+            }
+        };
+        trapsTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF);
+		trapsTable.setAutoResizeMode( JTable.AUTO_RESIZE_OFF );
 		trapModel = new DefaultTableModel(
 			new Object[][] {
 			},
 			new String[] {
-				"Description", "Source", "Time", "Severity"
+					"Variable Bindings", "IP/Port", "State Reference", "Payload length"
 			}
 		);
-		
 		trapsTable.setModel(trapModel);
 		JScrollPane trapsScrollPane = new JScrollPane(trapsTable);
 		trapsScrollPane.setBounds(573, 373, 479, 164);
@@ -484,6 +510,7 @@ public class MainBrowserWindow extends JFrame {
 					JOptionPane.ERROR_MESSAGE);
 		}
 		addRowToBrowserTable(response[0], response[1], response[2], response[3]);
+		browserTable.changeSelection(browserTable.getRowCount()-1, 0, false, false);
 	}
 	
 

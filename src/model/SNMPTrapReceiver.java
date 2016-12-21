@@ -41,6 +41,7 @@ public class SNMPTrapReceiver extends Thread {
 						// PDU JUZ ODEBRANY - wyciaganie z niego danych
 						mainWindow.addTrapRow("" + pdu.getVariableBindings(), "" + e.getPeerAddress(), "" + e.getTmStateReference(), "" + pdu.getBERPayloadLength());
 						System.out.println(pdu);
+						System.out.println(e);
 						System.out.println("Trap Type = " + pdu.getType());
 						System.out.println("Variable Bindings = " + pdu.getVariableBindings());
 					}
