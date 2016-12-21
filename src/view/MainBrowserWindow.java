@@ -1,12 +1,9 @@
 package view;
 
 import java.awt.Color;
-import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ComponentAdapter;
-import java.awt.event.ComponentEvent;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -274,7 +271,12 @@ public class MainBrowserWindow extends JFrame {
 		/** BROWSER TABLE */
 		browserTable = new JTable()
 		{
-            public boolean getScrollableTracksViewportWidth()
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public boolean getScrollableTracksViewportWidth()
             {
                 return getPreferredSize().width < getParent().getWidth();
             }
@@ -378,7 +380,12 @@ public class MainBrowserWindow extends JFrame {
 		
 		trapsTable = new JTable()
 		{
-            public boolean getScrollableTracksViewportWidth()
+            /**
+			 * 
+			 */
+			private static final long serialVersionUID = 1L;
+
+			public boolean getScrollableTracksViewportWidth()
             {
                 return getPreferredSize().width < getParent().getWidth();
             }
@@ -508,6 +515,11 @@ public class MainBrowserWindow extends JFrame {
 		} catch (IOException e) {
 			JOptionPane.showMessageDialog(MainBrowserWindow.this, "SNMP GetNext failed.", "ERROR",
 					JOptionPane.ERROR_MESSAGE);
+		}
+		if(response[2].equals("END_OF_MIB"))
+		{
+			JOptionPane.showMessageDialog(MainBrowserWindow.this, "END OF MIB.", "MIB",
+					JOptionPane.INFORMATION_MESSAGE);
 		}
 		addRowToBrowserTable(response[0], response[1], response[2], response[3]);
 		browserTable.changeSelection(browserTable.getRowCount()-1, 0, false, false);
